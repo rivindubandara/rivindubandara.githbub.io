@@ -1,0 +1,144 @@
+<style>
+  #chartdiv {
+    width: 100%;
+    height: 80vh;
+    max-height: 700px;
+    min-height: 400px;
+    position: relative;
+  }
+
+  #centerImage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    z-index: 100;
+  }
+</style>
+
+<!-- Resources -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
+<div id="chartdiv">
+  <img id="centerImage" src="./AD+SFG_Logo_lrg.png" alt="Center Image" />
+</div>
+
+<script>
+  am5.ready(function () {
+    const root = am5.Root.new("chartdiv");
+
+    root.setThemes([am5themes_Animated.new(root)]);
+
+    const series = root.container.children.push(
+      am5hierarchy.Sunburst.new(root, {
+        categoryField: "name",
+        childDataField: "children",
+        valueField: "value",
+        initialDepth: 3,
+        downDepth: 1,
+        singleBranchOnly: true,
+        innerRadius: am5.percent(15),
+        outerRadius: am5.percent(95),
+        interactive: false,
+        tooltip: am5.Tooltip.new(root, {
+          forceHidden: true,
+        }),
+      })
+    );
+
+    // Disable all interactions
+    series.slices.template.setAll({
+      tooltipText: "",
+      fillOpacity: 1,
+      interactive: false,
+      cursorOverStyle: "none",
+    });
+
+    // Prevent zooming
+    series.set("zoomable", false);
+
+    // ALWAYS show labels
+    series.labels.template.setAll({
+      text: "{name}",
+      forceHidden: false,
+      oversizedBehavior: "wrap",
+      fontSize: 9,
+      maxWidth: 100,
+      textAlign: "center",
+    });
+
+    // Correct data: only leaves have values to equalize spacing
+    series.data.setAll([
+      {
+        name: "",
+        children: [
+          {
+            name: "Training & Education",
+            children: [
+              {
+                name: "Promote Curiosity",
+                children: [
+                  { name: "In-House Learning", value: 1 },
+                  { name: "External Education", value: 1 },
+                ],
+              },
+              {
+                name: "Leadership",
+                children: [{ name: "Director of Sustainability", value: 1 }],
+              },
+            ],
+          },
+          {
+            name: "Design & Approach",
+            children: [
+              {
+                name: "Net Zero Carbon Design",
+                children: [
+                  { name: "Net Zero Embodied Carbon", value: 1 },
+                  { name: "Net Zero Operational Carbon", value: 1 },
+                ],
+              },
+              {
+                name: "Support Low Embodied Carbon",
+                children: [
+                  { name: "Materials Red List", value: 1 },
+                  { name: "Sustainable Procurement", value: 1 },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Evaluation & Reporting",
+            children: [
+              {
+                name: "Benchmark Outcomes",
+                children: [
+                  { name: "Energy Modelling", value: 1 },
+                  { name: "Post Occupancy Eval", value: 1 },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Outreach & Advocacy",
+            children: [
+              {
+                name: "Advocate for Change",
+                children: [
+                  { name: "Share Learnings", value: 1 },
+                  { name: "Drive Industry Change", value: 1 },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    series.appear(1000, 100);
+  });
+</script>
