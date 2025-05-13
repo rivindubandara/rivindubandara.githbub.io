@@ -1,144 +1,122 @@
-<style>
-  #chartdiv {
-    width: 100%;
-    height: 80vh;
-    max-height: 700px;
-    min-height: 400px;
-    position: relative;
-  }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Green Donut Chart</title>
+  <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
+  <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <style>
+    #chartdiv {
+      width: 100%;
+      height: 600px;
+    }
+  </style>
+</head>
+<body>
 
-  #centerImage {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 150px;
-    height: 150px;
-    z-index: 100;
-  }
-</style>
+  <div id="chartdiv"></div>
 
-<!-- Resources -->
-<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/hierarchy.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+  <script>
+    am5.ready(function() {
 
-<div id="chartdiv">
-  <img id="centerImage" src="./AD+SFG_Logo_lrg.png" alt="Center Image" />
-</div>
+      // Create root and apply theme
+      var root = am5.Root.new("chartdiv");
+      root.setThemes([am5themes_Animated.new(root)]);
 
-<script>
-  am5.ready(function () {
-    const root = am5.Root.new("chartdiv");
+      // Create a sunburst series
+      var series = root.container.children.push(
+        am5hierarchy.Sunburst.new(root, {
+          singleBranchOnly: false,
+          downDepth: 1,
+          initialDepth: 3,
+          valueField: "value",
+          categoryField: "name",
+          childDataField: "children",
+          centerStrength: 0.4,
+        })
+      );
 
-    root.setThemes([am5themes_Animated.new(root)]);
+      // Define green shades for each depth
+      const greenShades = [
+        am5.color(0xD7E8C0), // lightest
+        am5.color(0xB4D89B),
+        am5.color(0x95C27A),
+        am5.color(0x78AC5A),
+        am5.color(0x5D9440), // darkest
+      ];
 
-    const series = root.container.children.push(
-      am5hierarchy.Sunburst.new(root, {
-        categoryField: "name",
-        childDataField: "children",
-        valueField: "value",
-        initialDepth: 3,
-        downDepth: 1,
-        singleBranchOnly: true,
-        innerRadius: am5.percent(15),
-        outerRadius: am5.percent(95),
-        interactive: false,
-        tooltip: am5.Tooltip.new(root, {
-          forceHidden: true,
-        }),
-      })
-    );
+      // Apply green colors based on depth
+      series.slices.template.adapters.add("fill", function(fill, target) {
+        let depth = target.dataItem.get("depth");
+        return greenShades[depth % greenShades.length];
+      });
 
-    // Disable all interactions
-    series.slices.template.setAll({
-      tooltipText: "",
-      fillOpacity: 1,
-      interactive: false,
-      cursorOverStyle: "none",
-    });
+      series.slices.template.adapters.add("stroke", function() {
+        return am5.color(0xffffff);
+      });
 
-    // Prevent zooming
-    series.set("zoomable", false);
+      // Label styling
+      series.labels.template.setAll({
+        text: "{name}",
+        forceHidden: false,
+        oversizedBehavior: "wrap",
+        fontSize: 10,
+        fill: am5.color(0x333333),
+        maxWidth: 90,
+        textAlign: "center",
+      });
 
-    // ALWAYS show labels
-    series.labels.template.setAll({
-      text: "{name}",
-      forceHidden: false,
-      oversizedBehavior: "wrap",
-      fontSize: 9,
-      maxWidth: 100,
-      textAlign: "center",
-    });
+      // Sample data (replace with your real hierarchy)
+      series.data.setAll([
+        {
+          name: "Core",
+          value: 0,
+          children: [
+            {
+              name: "Operations & Outlook",
+              value: 0,
+              children: [
+                { name: "Zero Waste by 2030", value: 1 },
+                { name: "Reduce Water", value: 1 },
+                { name: "Environmental Office", value: 1 },
+              ]
+            },
+            {
+              name: "Design & Approach",
+              value: 0,
+              children: [
+                { name: "Design for 100% Carbon Neutrality", value: 1 },
+                { name: "Ensure Our Thinking Supports Our Vision", value: 1 }
+              ]
+            },
+            {
+              name: "Evaluation & Reporting",
+              value: 0,
+              children: [
+                { name: "Benchmark Performance Outcomes", value: 1 }
+              ]
+            },
+            {
+              name: "Training & Education",
+              value: 0,
+              children: [
+                { name: "Leadership", value: 1 },
+                { name: "Promote Curiosity", value: 1 }
+              ]
+            },
+            {
+              name: "Outreach & Advocacy",
+              value: 0,
+              children: [
+                { name: "Drive Industry Change", value: 1 }
+              ]
+            }
+          ]
+        }
+      ]);
 
-    // Correct data: only leaves have values to equalize spacing
-    series.data.setAll([
-      {
-        name: "",
-        children: [
-          {
-            name: "Training & Education",
-            children: [
-              {
-                name: "Promote Curiosity",
-                children: [
-                  { name: "In-House Learning", value: 1 },
-                  { name: "External Education", value: 1 },
-                ],
-              },
-              {
-                name: "Leadership",
-                children: [{ name: "Director of Sustainability", value: 1 }],
-              },
-            ],
-          },
-          {
-            name: "Design & Approach",
-            children: [
-              {
-                name: "Net Zero Carbon Design",
-                children: [
-                  { name: "Net Zero Embodied Carbon", value: 1 },
-                  { name: "Net Zero Operational Carbon", value: 1 },
-                ],
-              },
-              {
-                name: "Support Low Embodied Carbon",
-                children: [
-                  { name: "Materials Red List", value: 1 },
-                  { name: "Sustainable Procurement", value: 1 },
-                ],
-              },
-            ],
-          },
-          {
-            name: "Evaluation & Reporting",
-            children: [
-              {
-                name: "Benchmark Outcomes",
-                children: [
-                  { name: "Energy Modelling", value: 1 },
-                  { name: "Post Occupancy Eval", value: 1 },
-                ],
-              },
-            ],
-          },
-          {
-            name: "Outreach & Advocacy",
-            children: [
-              {
-                name: "Advocate for Change",
-                children: [
-                  { name: "Share Learnings", value: 1 },
-                  { name: "Drive Industry Change", value: 1 },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ]);
-
-    series.appear(1000, 100);
-  });
-</script>
+    }); // end am5.ready()
+  </script>
+</body>
+</html>
